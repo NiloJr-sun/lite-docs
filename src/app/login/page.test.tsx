@@ -42,7 +42,7 @@ describe("LoginPage", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("navigates home on valid credentials", async () => {
+  it("navigates to the documents list on valid credentials", async () => {
     const user = userEvent.setup();
     renderLogin();
 
@@ -50,7 +50,7 @@ describe("LoginPage", () => {
     await user.type(screen.getByLabelText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect(push).toHaveBeenCalledWith("/");
+    expect(push).toHaveBeenCalledWith("/documents");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
