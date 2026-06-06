@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Editor } from "@/components/editor";
 import { RequireAuth } from "@/components/require-auth";
+import { ShareButton } from "@/components/share-button";
 import { getDocument, updateDocument, type Document } from "@/lib/documents";
 
 const AUTOSAVE_DELAY_MS = 800;
@@ -137,6 +138,7 @@ function DocumentEditor({ id }: { id: string }) {
           >
             {STATUS_LABEL[status]}
           </span>
+          <ShareButton documentId={id} />
           <button
             type="button"
             onClick={() => void save()}

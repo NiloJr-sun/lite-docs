@@ -10,16 +10,57 @@ import {
   listDocuments,
   type Document,
 } from "@/lib/documents";
+import { listSharedWithMe } from "@/lib/shares";
 import { parseFile, UPLOAD_ACCEPT } from "@/lib/import-file";
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleString();
 }
 
+function DocumentSection({
+  title,
+  documents,
+  emptyText,
+}: {
+  title: string;
+  documents: Document[];
+  emptyText: string;
+}) {
+  return (
+    <section className="mt-8">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+        {title}
+      </h2>
+      {documents.length === 0 ? (
+        <p className="mt-3 text-sm text-zinc-500">{emptyText}</p>
+      ) : (
+        <ul className="mt-3 flex flex-col gap-2">
+          {documents.map((doc) => (
+            <li key={doc.id}>
+              <Link
+                href={`/documents/${doc.id}`}
+                className="flex items-center justify-between rounded-lg border border-black/[.08] px-4 py-3 transition-colors hover:bg-black/[.03] dark:border-white/[.1] dark:hover:bg-white/[.05]"
+              >
+                <span className="font-medium">
+                  {doc.title || "Untitled document"}
+                </span>
+                <span className="text-xs text-zinc-500">
+                  {formatDate(doc.updated_at)}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function DocumentsList() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [sharedDocuments, setSharedDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
@@ -29,9 +70,11 @@ function DocumentsList() {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    listDocuments(user.id)
-      .then((docs) => {
-        if (active) setDocuments(docs);
+    Promise.all([listDocuments(user.id), listSharedWithMe(user.id)])
+      .then(([owned, shared]) => {
+        if (!active) return;
+        setDocuments(owned);
+        setSharedDocuments(shared);
       })
       .catch((err) => {
         if (active) setError(err.message ?? "Failed to load documents.");
@@ -125,33 +168,22 @@ function DocumentsList() {
         </p>
       )}
 
-      <div className="mt-8">
-        {loading ? (
-          <p className="text-sm text-zinc-500">Loading…</p>
-        ) : documents.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            No documents yet. Create your first one.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {documents.map((doc) => (
-              <li key={doc.id}>
-                <Link
-                  href={`/documents/${doc.id}`}
-                  className="flex items-center justify-between rounded-lg border border-black/[.08] px-4 py-3 transition-colors hover:bg-black/[.03] dark:border-white/[.1] dark:hover:bg-white/[.05]"
-                >
-                  <span className="font-medium">
-                    {doc.title || "Untitled document"}
-                  </span>
-                  <span className="text-xs text-zinc-500">
-                    {formatDate(doc.updated_at)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {loading ? (
+        <p className="mt-8 text-sm text-zinc-500">Loading…</p>
+      ) : (
+        <>
+          <DocumentSection
+            title="My Documents"
+            documents={documents}
+            emptyText="No documents yet. Create your first one."
+          />
+          <DocumentSection
+            title="Shared with Me"
+            documents={sharedDocuments}
+            emptyText="Nothing has been shared with you yet."
+          />
+        </>
+      )}
     </div>
   );
 }

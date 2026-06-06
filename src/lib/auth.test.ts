@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authenticate, SEED_ACCOUNTS } from "@/lib/auth";
+import { authenticate, findUserByEmail, SEED_ACCOUNTS } from "@/lib/auth";
 
 describe("authenticate", () => {
   it("returns the user for valid credentials", () => {
@@ -32,5 +32,24 @@ describe("authenticate", () => {
 
   it("seeds exactly two accounts", () => {
     expect(SEED_ACCOUNTS).toHaveLength(2);
+  });
+});
+
+describe("findUserByEmail", () => {
+  it("resolves an email to a user (case-insensitive, trimmed)", () => {
+    const user = findUserByEmail("  BOB@example.com ");
+    expect(user).toEqual({
+      id: "22222222-2222-2222-2222-222222222222",
+      email: "bob@example.com",
+      name: "Bob Brown",
+    });
+  });
+
+  it("does not expose the password", () => {
+    expect(findUserByEmail("alice@example.com")).not.toHaveProperty("password");
+  });
+
+  it("returns null for an unknown email", () => {
+    expect(findUserByEmail("nobody@example.com")).toBeNull();
   });
 });

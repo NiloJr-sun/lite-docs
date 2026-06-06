@@ -56,3 +56,21 @@ export function authenticate(email: string, password: string): User | null {
 
   return { id: match.id, email: match.email, name: match.name };
 }
+
+/**
+ * Look up a seeded user by email (case-insensitive). Used by sharing to resolve
+ * a recipient's email to their user id. Returns the `User` without password, or
+ * `null` if no account matches.
+ */
+export function findUserByEmail(email: string): User | null {
+  const normalizedEmail = email.trim().toLowerCase();
+  const match = SEED_ACCOUNTS.find(
+    (account) => account.email.toLowerCase() === normalizedEmail,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return { id: match.id, email: match.email, name: match.name };
+}
