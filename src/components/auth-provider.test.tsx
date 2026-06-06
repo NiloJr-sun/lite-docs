@@ -28,7 +28,9 @@ describe("useAuth", () => {
     });
 
     expect(result.current.user?.email).toBe("alice@example.com");
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).id).toBe("1");
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).id).toBe(
+      "11111111-1111-1111-1111-111111111111",
+    );
   });
 
   it("does not change state on invalid credentials", () => {
@@ -63,7 +65,11 @@ describe("useAuth", () => {
   it("restores an existing session from localStorage on mount", () => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ id: "2", email: "bob@example.com", name: "Bob Brown" }),
+      JSON.stringify({
+        id: "22222222-2222-2222-2222-222222222222",
+        email: "bob@example.com",
+        name: "Bob Brown",
+      }),
     );
 
     const { result } = renderHook(() => useAuth(), { wrapper });

@@ -15,16 +15,21 @@ interface SeedAccount extends User {
   password: string;
 }
 
-/** Hard-coded test accounts. Both use the password `password123`. */
+/**
+ * Hard-coded test accounts. Both use the password `password123`.
+ *
+ * The `id` values are real UUIDs because they are persisted to the `user_id`
+ * (uuid) column of the Supabase `documents` table.
+ */
 export const SEED_ACCOUNTS: readonly SeedAccount[] = [
   {
-    id: "1",
+    id: "11111111-1111-1111-1111-111111111111",
     email: "alice@example.com",
     name: "Alice Anderson",
     password: "password123",
   },
   {
-    id: "2",
+    id: "22222222-2222-2222-2222-222222222222",
     email: "bob@example.com",
     name: "Bob Brown",
     password: "password123",

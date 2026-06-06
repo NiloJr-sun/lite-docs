@@ -5,7 +5,7 @@ describe("authenticate", () => {
   it("returns the user for valid credentials", () => {
     const user = authenticate("alice@example.com", "password123");
     expect(user).toEqual({
-      id: "1",
+      id: "11111111-1111-1111-1111-111111111111",
       email: "alice@example.com",
       name: "Alice Anderson",
     });
@@ -19,7 +19,7 @@ describe("authenticate", () => {
 
   it("is case-insensitive and trims the email", () => {
     const user = authenticate("  ALICE@example.com  ", "password123");
-    expect(user?.id).toBe("1");
+    expect(user?.id).toBe("11111111-1111-1111-1111-111111111111");
   });
 
   it("returns null for a wrong password", () => {
