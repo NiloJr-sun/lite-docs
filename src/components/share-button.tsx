@@ -24,22 +24,22 @@ export function ShareButton({ documentId }: { documentId: string }) {
     event.preventDefault();
     if (!user) return;
     setFeedback(null);
-
-    const recipient = findUserByEmail(email);
-    if (!recipient) {
-      setFeedback({ type: "error", message: "No account with that email." });
-      return;
-    }
-    if (recipient.id === user.id) {
-      setFeedback({
-        type: "error",
-        message: "This document is already yours.",
-      });
-      return;
-    }
-
     setSubmitting(true);
+
     try {
+      const recipient = await findUserByEmail(email);
+      if (!recipient) {
+        setFeedback({ type: "error", message: "No account with that email." });
+        return;
+      }
+      if (recipient.id === user.id) {
+        setFeedback({
+          type: "error",
+          message: "This document is already yours.",
+        });
+        return;
+      }
+
       await shareDocument(documentId, recipient.id);
       setFeedback({
         type: "success",

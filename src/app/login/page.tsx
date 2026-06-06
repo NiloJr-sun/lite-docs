@@ -10,18 +10,25 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setSubmitting(true);
 
-    const user = login(email, password);
-    if (!user) {
-      setError("Invalid email or password.");
-      return;
+    try {
+      const user = await login(email, password);
+      if (!user) {
+        setError("Invalid email or password.");
+        return;
+      }
+      router.push("/documents");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    router.push("/documents");
   }
 
   return (
@@ -69,9 +76,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="mt-2 flex h-11 items-center justify-center rounded-full bg-foreground px-5 font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+            disabled={submitting}
+            className="mt-2 flex h-11 items-center justify-center rounded-full bg-foreground px-5 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-60 dark:hover:bg-[#ccc]"
           >
-            Sign in
+            {submitting ? "Signing in…" : "Sign in"}
           </button>
         </form>
       </main>
