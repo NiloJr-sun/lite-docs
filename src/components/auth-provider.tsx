@@ -14,10 +14,10 @@ export interface AuthContextValue {
   /** The currently signed-in user, or `null` when signed out. */
   user: User | null;
   /**
-   * Attempt to sign in. Returns the `User` on success or `null` when the
+   * Attempt to sign in. Resolves to the `User` on success or `null` when the
    * credentials don't match a seeded account.
    */
-  login: (email: string, password: string) => User | null;
+  login: (email: string, password: string) => Promise<User | null>;
   /** Clear the current session. */
   logout: () => void;
 }
@@ -76,8 +76,8 @@ function getServerSnapshot(): User | null {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const login = useCallback((email: string, password: string) => {
-    const authenticatedUser = authenticate(email, password);
+  const login = useCallback(async (email: string, password: string) => {
+    const authenticatedUser = await authenticate(email, password);
     if (authenticatedUser) {
       window.localStorage.setItem(
         STORAGE_KEY,

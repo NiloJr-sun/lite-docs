@@ -3,10 +3,17 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AuthProvider } from "@/components/auth-provider";
 import { ShareButton } from "@/components/share-button";
+import { findUserByEmail } from "@/lib/auth";
 
 const shareDocument = vi.fn();
 vi.mock("@/lib/shares", () => ({
   shareDocument: (...args: unknown[]) => shareDocument(...args),
+}));
+
+// authenticate is imported by AuthProvider; findUserByEmail is used here.
+vi.mock("@/lib/auth", () => ({
+  authenticate: vi.fn(),
+  findUserByEmail: vi.fn(),
 }));
 
 const ALICE = {
@@ -15,6 +22,9 @@ const ALICE = {
   name: "Alice Anderson",
 };
 const BOB_ID = "22222222-2222-2222-2222-222222222222";
+const BOB = { id: BOB_ID, email: "bob@example.com", name: "Bob Brown" };
+
+const mockedFind = vi.mocked(findUserByEmail);
 
 function renderShare() {
   // Sign in as Alice via the persisted session the provider reads on mount.
@@ -35,6 +45,13 @@ async function openDialog(user: ReturnType<typeof userEvent.setup>) {
 beforeEach(() => {
   shareDocument.mockReset();
   shareDocument.mockResolvedValue(undefined);
+  mockedFind.mockReset();
+  mockedFind.mockImplementation(async (email: string) => {
+    const normalized = email.trim().toLowerCase();
+    if (normalized === "alice@example.com") return ALICE;
+    if (normalized === "bob@example.com") return BOB;
+    return null;
+  });
 });
 
 describe("ShareButton", () => {
