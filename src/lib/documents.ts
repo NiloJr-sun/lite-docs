@@ -27,14 +27,18 @@ export async function listDocuments(userId: string): Promise<Document[]> {
   return data ?? [];
 }
 
-/** Create a new (empty) document owned by the given user. */
+/**
+ * Create a new document owned by the given user. Pass `content` to pre-populate
+ * it (e.g. from an uploaded file); defaults to empty.
+ */
 export async function createDocument(
   userId: string,
   title: string = DEFAULT_TITLE,
+  content: string = "",
 ): Promise<Document> {
   const { data, error } = await supabase
     .from(TABLE)
-    .insert({ user_id: userId, title, content: "" })
+    .insert({ user_id: userId, title, content })
     .select()
     .single();
 

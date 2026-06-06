@@ -66,6 +66,19 @@ describe("documents data layer", () => {
     expect(result).toEqual(row);
   });
 
+  it("createDocument can pre-populate title and content (file import)", async () => {
+    const builder = makeBuilder({ data: { id: "new" }, error: null });
+    from.mockReturnValue(builder);
+
+    await createDocument(USER, "Imported", "<h1>Hello</h1>");
+
+    expect(builder.insert).toHaveBeenCalledWith({
+      user_id: USER,
+      title: "Imported",
+      content: "<h1>Hello</h1>",
+    });
+  });
+
   it("getDocument returns null when the row is missing", async () => {
     const builder = makeBuilder({ data: null, error: null });
     from.mockReturnValue(builder);

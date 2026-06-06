@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
@@ -10,6 +10,7 @@ import {
   listDocuments,
   type Document,
 } from "@/lib/documents";
+import { parseFile, UPLOAD_ACCEPT } from "@/lib/import-file";
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleString();
@@ -22,6 +23,8 @@ function DocumentsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -54,6 +57,24 @@ function DocumentsList() {
     }
   }
 
+  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset the input so selecting the same file again re-triggers onChange.
+    event.target.value = "";
+    if (!file || !user) return;
+
+    setImporting(true);
+    setError("");
+    try {
+      const { title, html } = await parseFile(file);
+      const doc = await createDocument(user.id, title, html);
+      router.push(`/documents/${doc.id}`);
+    } catch (err) {
+      setError((err as Error).message ?? "Failed to import file.");
+      setImporting(false);
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12">
       <header className="flex items-center justify-between">
@@ -71,6 +92,22 @@ function DocumentsList() {
             className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-60 dark:hover:bg-[#ccc]"
           >
             {creating ? "Creating…" : "New document"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={UPLOAD_ACCEPT}
+            onChange={handleUpload}
+            className="hidden"
+            aria-label="Upload a .txt, .md, or .docx file"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="rounded-full border border-black/[.1] px-4 py-2 text-sm font-medium transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:border-white/[.15] dark:hover:bg-white/[.06]"
+          >
+            {importing ? "Importing…" : "Upload file"}
           </button>
           <button
             type="button"
